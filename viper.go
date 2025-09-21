@@ -188,6 +188,8 @@ type Viper struct {
 
 	experimentalFinder     bool
 	experimentalBindStruct bool
+
+	lock *sync.Mutex
 }
 
 // New returns an initialized Viper instance.
@@ -215,6 +217,8 @@ func New() *Viper {
 
 	v.experimentalFinder = features.Finder
 	v.experimentalBindStruct = features.BindStruct
+
+	v.lock = &sync.Mutex{}
 
 	return v
 }
@@ -714,6 +718,9 @@ func GetViper() *Viper {
 func Get(key string) any { return v.Get(key) }
 
 func (v *Viper) Get(key string) any {
+	v.lock.Lock()
+	defer v.lock.Unlock()
+
 	lcaseKey := strings.ToLower(key)
 	val := v.find(lcaseKey, true)
 	if val == nil {
@@ -1499,6 +1506,9 @@ func (v *Viper) SetDefault(key string, value any) {
 func Set(key string, value any) { v.Set(key, value) }
 
 func (v *Viper) Set(key string, value any) {
+	v.lock.Lock()
+	defer v.lock.Unlock()
+
 	// If alias passed in, then set the proper override
 	key = v.realKey(strings.ToLower(key))
 	value = toCaseInsensitiveValue(value)
