@@ -1487,6 +1487,9 @@ func (v *Viper) InConfig(key string) bool {
 func SetDefault(key string, value any) { v.SetDefault(key, value) }
 
 func (v *Viper) SetDefault(key string, value any) {
+	v.lock.Lock()
+	defer v.lock.Unlock()
+
 	// If alias passed in, then set the proper default
 	key = v.realKey(strings.ToLower(key))
 	value = toCaseInsensitiveValue(value)
